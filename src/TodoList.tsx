@@ -1,7 +1,7 @@
 import React, {ChangeEvent, KeyboardEvent, useState} from "react";
 import {FilterValuesType} from "./App";
 
-type TaskType = {
+export type TaskType = {
     id: string
     title: string
     isDone: boolean
@@ -10,11 +10,13 @@ type TaskType = {
 type PropsType = {
     title: string
     tasks: Array<TaskType>
-    removeTask: (taskId: string) => void
-    changeFilter: (value: FilterValuesType) => void
-    addTask: (title: string) => void
-    changeStatus: (id: string, isDone: boolean) => void
+    removeTask: (taskId: string, todoListId: string) => void
+    changeFilter: (value: FilterValuesType, todoListId: string) => void
+    addTask: (title: string, todoListId: string) => void
+    changeStatus: (id: string, isDone: boolean, todoListId: string) => void
     filter: FilterValuesType
+    id: string
+    removeTodoList: (id: string) => void
 }
 
 export function TodoList(props: PropsType) {
@@ -24,7 +26,7 @@ export function TodoList(props: PropsType) {
 
     const addTask = () => {
         if (title.trim() !== '') {
-            props.addTask(title);
+            props.addTask(title, props.id);
             setTitle('')
         } else {
             setError('Title is required')
@@ -43,20 +45,27 @@ export function TodoList(props: PropsType) {
     };
 
     const onAllClickHandler = () => {
-        props.changeFilter('all')
+        props.changeFilter('all', props.id)
     };
 
     const onActiveClickHandler = () => {
-        props.changeFilter('active')
+        props.changeFilter('active', props.id)
     };
 
     const onCompletedClickHandler = () => {
-        props.changeFilter('completed')
+        props.changeFilter('completed', props.id)
+    };
+
+    const removeTodoList = () => {
+      props.removeTodoList(props.id)
     };
 
     return (
         <div>
-            <h3>{props.title}</h3>
+            <h3>{props.title}
+                <button onClick={removeTodoList}>X</button>
+            </h3>
+
             <div>
                 <input value={title}
                        onChange={onChangeHandler}
@@ -71,12 +80,12 @@ export function TodoList(props: PropsType) {
                     props.tasks.map(t => {
 
                         const onClickHandler = () => {
-                            props.removeTask(t.id)
+                            props.removeTask(t.id, props.id)
                         };
 
                         const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
                             let newIsDoneValue = e.currentTarget.checked;
-                            props.changeStatus(t.id, newIsDoneValue)
+                            props.changeStatus(t.id, newIsDoneValue, props.id)
                         };
 
                         return <li key={t.id} className={t.isDone ? 'is-done' : ''}>
